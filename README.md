@@ -12,10 +12,10 @@ TypeScript source, no build step: the app compiles it with its own Vite and `tsc
 | Module | What |
 |---|---|
 | `api` | `ApiClient`: bearer token kept in the browser, the error envelope (`ApiError`), sign-ins (Google, pairing code, dev login), `me`, leaderboard, hall of fame. The game adds its own calls with `call` |
-| `signin` | the flat page's sign-in section (`#google`, `#pair`, `#pairing`, `#pair-url`, `#pair-code`, `#pair-cancel`, `#dev-signin`, `#dev-identities`) |
+| `signin` | the flat page's sign-in section (`#google`, `#pair`, `#pairing`, `#pair-url`, `#pair-code`, `#pair-cancel`, `#dev-signin`, `#dev-identities`); `codeExpired` for its one message in another language |
 | `google` | Google Identity Services button, giving an ID token |
 | `realtime` | a Mercure stream, read with fetch and a bearer, reconnecting |
-| `stage` | the table in the room: renderer, XR session, passthrough, controllers and hands, pinch, rays, mouse drag, status board, standings panel, "Move table". The game puts its cards on `stage.table` and gets `activate` and `release` calls (`StageDelegate`) |
+| `stage` | the table in the room: renderer, XR session, passthrough, controllers and hands, pinch, rays, mouse drag, status board, standings panel, "Move table". The game puts its cards on `stage.table` and gets `activate` and `release` calls (`StageDelegate`). Its own words are English unless the game passes `texts` |
 | `placement` | the table set on a real surface, anchored, found again next session |
 | `fan` | `HandFan` (the player's hand: layout, "is this point over it", "where along it") and `heldFan` (the other players') |
 | `layout` | the table being rearranged before it is sent, and the player's order of the hand; `fixed` keeps what was on the table there |

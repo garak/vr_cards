@@ -35,6 +35,21 @@ export interface StageDelegate {
     release(code: string, drop: Drop | null): void;
 }
 
+/** What the stage itself writes on the table, for a game in another language. English by default. */
+export interface StageTexts {
+    placingTitle: string;
+    placingHint: string;
+    standings: string;
+    moveTable: string;
+}
+
+const TEXTS: StageTexts = {
+    placingTitle: "Where is your table?",
+    placingHint: "look at it, then pinch or pull the trigger",
+    standings: "Standings",
+    moveTable: "Move table",
+};
+
 export interface StageOptions {
     /** Metres, in the floor-level space the session starts in, where the table stands when not set on a surface. */
     position: THREE.Vector3;
@@ -46,6 +61,7 @@ export interface StageOptions {
     background?: string;
     /** Where the flat page looks from; by default a seat at the near edge, eyes 66 cm over the felt. */
     camera?: THREE.Vector3;
+    texts?: Partial<StageTexts>;
 }
 
 export class Stage {
@@ -68,6 +84,7 @@ export class Stage {
     // the card the mouse (or the flat page's pointer, in the headset) is dragging
     private dragged: THREE.Object3D | null = null;
     private readonly background: THREE.Color;
+    private readonly texts: StageTexts;
 
     constructor(
         container: HTMLElement,
@@ -88,6 +105,7 @@ export class Stage {
         this.orbit.target.copy(options.position);
         this.orbit.update();
         this.background = new THREE.Color(options.background ?? "#20262b");
+        this.texts = { ...TEXTS, ...options.texts };
         this.scene.background = this.background;
 
         this.hud = new Label(0.6, 0.16);
@@ -164,7 +182,7 @@ export class Stage {
     private placingChanged(): void {
         const placing = this.placement.placing;
         this.hud.set(
-            placing ? [{ text: "Where is your table?", bold: true, size: 46 }, { text: "look at it, then pinch or pull the trigger", size: 32 }] : this.hudLines,
+            placing ? [{ text: this.texts.placingTitle, bold: true, size: 46 }, { text: this.texts.placingHint, size: 32 }] : this.hudLines,
             placing || this.hudHighlight ? ACCENT : null,
         );
         this.moveButton.visible = this.placement.available && !placing;
@@ -187,10 +205,10 @@ export class Stage {
         this.table.add(this.hud);
 
         // stacked to the right of the status board
-        this.standingsButton.set([{ text: "Standings", size: 36 }]);
+        this.standingsButton.set([{ text: this.texts.standings, size: 36 }]);
         this.standingsButton.position.set(0.41, 0.41, far);
         this.standingsButton.rotation.x = 0.15;
-        this.moveButton.set([{ text: "Move table", size: 36 }]);
+        this.moveButton.set([{ text: this.texts.moveTable, size: 36 }]);
         this.moveButton.position.set(0.41, 0.35, far);
         this.moveButton.rotation.x = 0.15;
         this.moveButton.visible = false;

@@ -16,6 +16,8 @@ export interface SignInOptions {
     signedIn(player: Player): void;
     failed(error: unknown): void;
     say(text: string): void;
+    /** What to say when a code runs out; English by default. */
+    codeExpired?: string;
 }
 
 const $ = (id: string): HTMLElement => document.getElementById(id) as HTMLElement;
@@ -76,7 +78,7 @@ export class SignIn {
             }
             if (Date.now() > expires) {
                 this.stopPairing();
-                this.options.say("The code expired: ask for a new one.");
+                this.options.say(this.options.codeExpired ?? "The code expired: ask for a new one.");
 
                 return;
             }
