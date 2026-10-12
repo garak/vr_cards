@@ -1,0 +1,47 @@
+{
+    "name": "@garak_/vr-cards",
+    "version": "0.1.0",
+    "description": "A card table in mixed reality for WebXR (Meta Quest browser): stage, hands, layouts, sign-in and realtime for a card game API, on Three.js",
+    "keywords": [
+        "webxr",
+        "three",
+        "cards",
+        "card-game",
+        "mixed-reality",
+        "quest"
+    ],
+    "license": "LGPL-3.0-or-later",
+    "author": "Massimiliano Arione",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/garak/vr_cards.git"
+    },
+    "homepage": "https://github.com/garak/vr_cards#readme",
+    "bugs": {
+        "url": "https://github.com/garak/vr_cards/issues"
+    },
+    "type": "module",
+    "exports": {
+        "./*": "./src/*.ts"
+    },
+    "files": [
+        "src",
+        "!src/**/*.test.ts",
+        "LICENSE",
+        "COPYING"
+    ],
+    "scripts": {
+        "check": "tsc --noEmit",
+        "test": "vitest run"
+    },
+    "peerDependencies": {
+        "three": "^0.186.1"
+    },
+    "devDependencies": {
+        "@types/three": "^0.186.0",
+        "three": "^0.186.1",
+        "typescript": "^7.0.2",
+        "vite": "^8.3.4",
+        "vitest": "^5.0.3"
+    }
+}
