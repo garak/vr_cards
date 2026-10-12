@@ -1,6 +1,6 @@
 {
     "name": "@garak_/vr-cards",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "A card table in mixed reality for WebXR (Meta Quest browser): stage, hands, layouts, sign-in and realtime for a card game API, on Three.js",
     "keywords": [
         "webxr",
