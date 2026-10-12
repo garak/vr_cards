@@ -137,6 +137,12 @@ function placeholder(canvas: HTMLCanvasElement, svg: string): void {
 
 const geometry = new THREE.PlaneGeometry(CARD_WIDTH, CARD_HEIGHT);
 
+// The rounded corners are transparent in the picture. Cut out rather than blended: blending would need cards sorted
+// back to front, and they overlap in every fan and pile.
+function material(map: THREE.Texture): THREE.MeshBasicMaterial {
+    return new THREE.MeshBasicMaterial({ map, alphaTest: 0.5 });
+}
+
 /** The back of the deck a card belongs to: "r" or "b". Red back is 2B.svg, blue 1B.svg. */
 export function backTexture(back: string): THREE.Texture {
     return texture("r" === back ? "2B" : "1B");
@@ -150,8 +156,8 @@ export function cardMesh(code: string): THREE.Group {
     const card = new THREE.Group();
     card.name = code;
     card.userData.code = code;
-    const face = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ map: texture(file(code)) }));
-    const back = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ map: backTexture(code[2] ?? "r") }));
+    const face = new THREE.Mesh(geometry, material(texture(file(code))));
+    const back = new THREE.Mesh(geometry, material(backTexture(code[2] ?? "r")));
     back.rotation.y = Math.PI;
     card.add(face, back);
 
@@ -160,7 +166,7 @@ export function cardMesh(code: string): THREE.Group {
 
 /** A back alone, facing +Z, with the same size as a card: the top of the stock, a card in an opponent's hand. */
 export function backMesh(back: string): THREE.Mesh {
-    return new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ map: backTexture(back) }));
+    return new THREE.Mesh(geometry, material(backTexture(back)));
 }
 
 export function stockMesh(back: string): THREE.Mesh {
