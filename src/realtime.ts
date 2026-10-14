@@ -1,26 +1,42 @@
 // Live updates from the Mercure hub. EventSource cannot send a header, and the hub wants the subscriber token
 // as a bearer here (no cookie across origins), so the stream is read with fetch. The updates carry only the
-// game's revision: whoever listens re-fetches the view when it is newer than what it shows.
+// game's revision: whoever listens re-fetches the view when it is newer than what it shows. The token expires, and
+// the hub then closes the stream and answers 401: whoever can get a fresh one passes `renew`.
 
 import type { GameUpdate, Realtime } from "./api";
 
 /**
  * Listens until stopped; reconnects after a drop, with a growing pause. Returns the function that stops it.
  * `proxied`: the API goes through the dev server, and so must the hub (see ApiClient.proxied).
+ * `renew`: a fresh token (and address), asked once the one in hand has expired or the hub refused it. Without it,
+ * the stream keeps trying the same token.
  */
-export function subscribe(realtime: Realtime, onUpdate: (update: GameUpdate) => void, proxied: boolean): () => void {
+export function subscribe(
+    realtime: Realtime,
+    onUpdate: (update: GameUpdate) => void,
+    proxied: boolean,
+    renew?: () => Promise<Realtime>,
+): () => void {
     const controller = new AbortController();
     // the hub's address is absolute, built from the host the API saw: behind the dev proxy, that is the backend's
-    const url = proxied ? (({ pathname, search }) => pathname + search)(new URL(realtime.url)) : realtime.url;
+    const address = (url: string) => (proxied ? (({ pathname, search }) => pathname + search)(new URL(url)) : url);
 
     void (async () => {
         let pause = 1000;
+        let current = realtime;
+        let refused = false;
         while (!controller.signal.aborted) {
             try {
-                const response = await fetch(url, {
-                    headers: { Accept: "text/event-stream", Authorization: `Bearer ${realtime.token}` },
+                if (renew && (refused || expired(current))) {
+                    current = await renew();
+                    refused = false;
+                }
+                const response = await fetch(address(current.url), {
+                    headers: { Accept: "text/event-stream", Authorization: `Bearer ${current.token}` },
                     signal: controller.signal,
                 });
+                // renewed on the next round, after the pause: a token refused again must not spin
+                refused = 401 === response.status;
                 if (!response.ok || null === response.body) {
                     throw new Error(`Hub answered ${response.status}.`);
                 }
@@ -38,6 +54,11 @@ export function subscribe(realtime: Realtime, onUpdate: (update: GameUpdate) => 
     })();
 
     return () => controller.abort();
+}
+
+// an unreadable date (as in a demo) never expires
+function expired(realtime: Realtime): boolean {
+    return Date.parse(realtime.expires) <= Date.now();
 }
 
 // Server-sent events: blocks separated by a blank line, the payload on "data:" lines.
